@@ -1,0 +1,380 @@
+/* =========================================
+   🍸 ESTILOS DEL PUB (QUICK SERVICE) Y VARIABLES
+   ========================================= */
+.tema-pub {
+  --bg: #0B0B0B;
+  --surface: #1A1A1A;
+  --accent: #E50914; 
+  --text: #F5F5F5;
+  --text-muted: #888888;
+  --border: #333333;
+  --libre: #3E8659;
+  --libre-bg: #1A2E22;
+  --ocupada: #B33A3A;
+  --ocupada-bg: #F6E4E2;
+}
+
+button:focus, .pub-btn:focus, input:focus {
+  outline: none;
+}
+
+/* =========================================
+   LAYOUT PRINCIPAL DEL PUB
+   ========================================= */
+.pub-container {
+  display: flex;
+  gap: 20px;
+  height: calc(100vh - 70px);
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.pub-left {
+  flex: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0; 
+}
+
+/* 🚀 Grilla de 3x3 forzada en PC */
+.pub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  flex: 1;
+  align-content: start;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.pub-grid::-webkit-scrollbar { width: 6px; }
+.pub-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.pub-btn {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  color: var(--text);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  height: 130px; 
+}
+
+.pub-btn:active {
+  transform: scale(0.94);
+  border-color: var(--accent);
+}
+
+.pub-btn-name { font-weight: 800; font-size: 15px; text-align: center; line-height: 1.2; }
+.pub-btn-price { font-family: 'Oswald', sans-serif; color: var(--accent); font-size: 16px; }
+
+.pub-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+/* =========================================
+   🧾 TICKET DERECHO
+   ========================================= */
+.pub-right {
+  flex: 4;
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.ticket-header {
+  background: var(--bg);
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  color: var(--text);
+  letter-spacing: 0.05em;
+}
+
+.ticket-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pub-ticket-row { display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: 600; }
+.pub-ticket-qty { color: var(--accent); margin-right: 8px; font-weight: 800; }
+
+.pub-pay-section {
+  padding: 20px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0; 
+}
+
+.pub-total {
+  font-family: 'Oswald', sans-serif;
+  font-size: 34px;
+  text-align: right;
+  margin-bottom: 16px;
+  color: #FFF;
+  font-weight: 700;
+}
+
+.pub-pay-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pub-pay-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.pub-pay-btn.active { background: var(--accent); color: #FFF; border-color: var(--accent); }
+
+
+/* =========================================
+   🔔 ALERTAS FLOTANTES (TOAST)
+   ========================================= */
+.alerta-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ocupada);
+  color: #FFF;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from { top: -40px; opacity: 0; }
+  to { top: 20px; opacity: 1; }
+}
+
+/* =========================================
+   🛡️ MODALES Y PANEL ADMIN
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.85); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.admin-modal {
+  max-width: 900px;
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg);
+  font-family: 'Oswald', sans-serif;
+  font-size: 20px;
+  color: var(--accent);
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  color: var(--text);
+}
+
+/* =========================================
+   📝 INTERIORES DEL MODAL ADMIN (TABLAS Y FORMULARIOS)
+   ========================================= */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 12px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.admin-input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  font-size: 14px;
+}
+
+.admin-input:focus { border-color: var(--accent); }
+
+.admin-table-container {
+  max-height: 50vh;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+.admin-table th {
+  background: var(--bg);
+  padding: 14px 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.admin-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 15px;
+}
+
+.admin-table-container::-webkit-scrollbar { width: 6px; }
+.admin-table-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+
+/* =========================================
+   📱 DISEÑO RESPONSIVE (Móviles y Tablets)
+   ========================================= */
+@media (max-width: 1024px) {
+  .pub-container {
+    flex-direction: column;
+    height: 100vh;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .pub-left {
+    width: 100%;
+    flex: 1; 
+  }
+
+  .pub-grid {
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px;
+  }
+
+  .pub-btn {
+    height: 90px; 
+    padding: 8px;
+  }
+  
+  .pub-btn-name { font-size: 12px; }
+
+  /* Ocultar ticket del medio */
+  .ticket-header, .ticket-items {
+    display: none; 
+  }
+
+  /* Botón de cobrar abajo de todo */
+  .pub-right {
+    flex: none; 
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .pub-pay-section {
+    padding: 15px 10px;
+  }
+  
+  .pub-total {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  /* El modal admin en celu se ajusta a columnas */
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   🖨️ ESTILOS DE IMPRESIÓN (NATIVO DEL NAVEGADOR)
+   ========================================= */
+.ticket-impresion {
+  display: none; /* En la pantalla normal (negra) no se ve */
+}
+
+@media print {
+  /* 1. Apagamos la interfaz gráfica completa */
+  .bc-header, .pub-container, .alerta-toast, .modal-overlay {
+    display: none !important;
+  }
+  
+  /* 2. Reseteamos el fondo del navegador a blanco */
+  body, html {
+    background: #FFF !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* 3. Encendemos el ticket para que Chrome lo lea */
+  .ticket-impresion {
+    display: block !important;
+    color: #000;
+    background: #FFF;
+    width: 300px; /* Ancho estándar de comandera (80mm) */
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    padding: 10px;
+  }
+}
