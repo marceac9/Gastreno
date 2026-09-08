@@ -40,7 +40,7 @@ export default function Login({ onLogin }) {
     <div className="login-container">
       <div className="login-box">
         {/* Tu título, logo y diseño original van acá */}
-        <h1 style={{ color: '#E50914', textAlign: 'center' }}>GoFood</h1>
+        <h1 style={{ color: '#E50914', textAlign: 'center' }}>Gastreno  </h1>
         <p style={{ color: '#888', textAlign: 'center' }}>Sistema de Gestión Gastronómica</p>
 
         {/* 🚀 El form debe ejecutar manejarSubmit */}
