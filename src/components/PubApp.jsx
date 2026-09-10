@@ -20,7 +20,7 @@ export default function PubApp({ onSalir }) {
   const [modalAdminAbierto, setModalAdminAbierto] = useState(false);
   const [adminTab, setAdminTab] = useState('carta'); 
   const [intentoSalir, setIntentoSalir] = useState(false); 
-  const [ventaAEliminar, setVentaAEliminar] = useState(null); 
+  const [ventaAEliminar, setVentaAEliminar] = useState(null); // Ahora guarda el objeto completo (venta o gasto)
 
   // --- ESTADOS DE CONTABILIDAD Y GASTOS ---
   const [ventasDiarias, setVentasDiarias] = useState([]); 
@@ -42,22 +42,19 @@ export default function PubApp({ onSalir }) {
   }
 
   // ==========================================
-  // 🚀 1. CARGAR TODO DESDE SUPABASE AL ABRIR
+  // 🚀 CARGAR TODO DESDE SUPABASE AL ABRIR
   // ==========================================
   useEffect(() => {
     obtenerDatos();
   }, []);
 
   async function obtenerDatos() {
-    // Trae el catálogo
     const { data: prodData } = await supabase.from('productos_pub').select('*').order('id', { ascending: true });
     if (prodData) setCatalogo(prodData);
 
-    // Trae las ventas (de la más nueva a la más vieja)
     const { data: ventData } = await supabase.from('ventas_pub').select('*').order('id', { ascending: false });
     if (ventData) setVentasDiarias(ventData);
 
-    // Trae los gastos
     const { data: gastData } = await supabase.from('gastos_pub').select('*').order('id', { ascending: false });
     if (gastData) setListaGastos(gastData);
   }
@@ -115,7 +112,7 @@ export default function PubApp({ onSalir }) {
   const total = ticket.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
   // ==========================================
-  // 🚀 2. COBRAR Y MANDAR VENTA A LA NUBE
+  // 🚀 COBRAR Y MANDAR VENTA A LA NUBE
   // ==========================================
   async function cobrarTicket() {
     if (ticket.length === 0) return;
@@ -133,7 +130,6 @@ export default function PubApp({ onSalir }) {
       .select();
 
     if (!error && data) {
-      // Lo agregamos arriba de todo en el historial visual
       setVentasDiarias(prev => [data[0], ...prev]);
       mostrarAlerta(`¡Venta cobrada! Ingreso: ${formatMoney(total)} en ${metodoPago}`);
       vaciarTicket();
@@ -277,25 +273,36 @@ export default function PubApp({ onSalir }) {
   }
 
   // ==========================================
-  // 🚀 3. ELIMINAR VENTA DE LA NUBE
+  // 🚀 ELIMINAR VENTA O GASTO DE LA NUBE
   // ==========================================
   async function confirmarEliminacionVenta() {
     if (!ventaAEliminar) return;
-    const idBorrar = ventaAEliminar;
-
-    const { error } = await supabase.from('ventas_pub').delete().eq('id', idBorrar);
     
-    if (!error) {
-      setVentasDiarias(prev => prev.filter(v => v.id !== idBorrar));
-      mostrarAlerta('Transacción eliminada de la nube.');
+    const { id, tipo } = ventaAEliminar;
+
+    if (tipo === 'gasto') {
+      const { error } = await supabase.from('gastos_pub').delete().eq('id', id);
+      if (!error) {
+        setListaGastos(prev => prev.filter(g => g.id !== id));
+        mostrarAlerta('Gasto eliminado. El monto vuelve a la caja.');
+      } else {
+        mostrarAlerta('Error al intentar borrar el gasto.');
+      }
     } else {
-      mostrarAlerta('Error al intentar borrar la venta.');
+      const { error } = await supabase.from('ventas_pub').delete().eq('id', id);
+      if (!error) {
+        setVentasDiarias(prev => prev.filter(v => v.id !== id));
+        mostrarAlerta('Transacción eliminada de la caja.');
+      } else {
+        mostrarAlerta('Error al intentar borrar la venta.');
+      }
     }
-    setVentaAEliminar(null);
+    
+    setVentaAEliminar(null); // Cierra el modal
   }
 
   // ==========================================
-  // 🚀 4. REGISTRAR GASTO EN LA NUBE
+  // 🚀 REGISTRAR GASTO EN LA NUBE
   // ==========================================
   async function registrarGasto(e) {
     e.preventDefault();
@@ -322,34 +329,27 @@ export default function PubApp({ onSalir }) {
     }
   }
 
- function exportarAExcel() {
-    // Verificamos que haya ALGO para exportar (ventas o gastos)
+  function exportarAExcel() {
     if (ventasDiarias.length === 0 && listaGastos.length === 0) {
       mostrarAlerta('No hay movimientos en la caja para exportar.');
       return;
     }
 
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-    
-    // 🚀 NUEVO: Agregamos la columna "Tipo" para saber si suma o resta
     csvContent += "Tipo de Movimiento;Hora;Método de Pago;Detalle;Monto\n";
 
-    // 1. Cargamos todas las VENTAS (Suman)
     ventasDiarias.forEach(venta => {
       const detalleLimpio = venta.resumen ? venta.resumen.replace(/;/g, ' |') : ''; 
       const fila = `INGRESO;${venta.hora || '--'};${venta.metodo};${detalleLimpio};$${venta.total}`;
       csvContent += fila + "\n";
     });
 
-    // 2. Cargamos todos los GASTOS (Restan)
     listaGastos.forEach(gasto => {
       const detalleLimpio = gasto.descripcion ? gasto.descripcion.replace(/;/g, ' |') : ''; 
-      // Le ponemos el signo menos (-) al monto para que en Excel figure como pérdida
       const fila = `EGRESO;--;Efectivo (Caja);Gastos: ${detalleLimpio};-$${gasto.monto}`;
       csvContent += fila + "\n";
     });
 
-    // Generamos la descarga
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -357,7 +357,6 @@ export default function PubApp({ onSalir }) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
     mostrarAlerta('¡Historial exportado con éxito!');
   }
 
@@ -373,12 +372,19 @@ export default function PubApp({ onSalir }) {
   const cajaTransferencia = ventasDiarias.filter(v => v.metodo === 'Transferencia').reduce((acc, v) => acc + v.total, 0);
   const totalGastos = listaGastos.reduce((acc, g) => acc + g.monto, 0);
 
+  // 🚀 MEZCLAMOS VENTAS Y GASTOS PARA LA TABLA DEL HISTORIAL
+  const historialMovimientos = [
+    ...ventasDiarias.map(v => ({ ...v, tipo: 'venta' })),
+    ...listaGastos.map(g => ({ ...g, tipo: 'gasto' }))
+  ].sort((a, b) => b.id - a.id); // Los ordenamos por ID para que los más nuevos salgan arriba
+
   return (
     <div className="bc-app tema-pub">
       {/* HEADER */}
       <div className="bc-header" style={{ justifyContent: 'space-between', padding: '12px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div className="bc-script" style={{ fontSize: 28, color: 'var(--accent)', lineHeight: 1 }}>The puchi's Club</div>
+          {/* 🚀 TÍTULO ACTUALIZADO A THE PUCHI'S CLUB */}
+          <div className="bc-script" style={{ fontSize: 28, color: 'var(--accent)', lineHeight: 1 }}>The Puchi's Club</div>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button className="btn btn-outline" style={{ padding: '8px 16px' }} onClick={() => setModalAdminAbierto(true)}>
@@ -611,31 +617,42 @@ export default function PubApp({ onSalir }) {
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <h4 style={{ margin: 0, color: 'var(--text-muted)' }}>Ventas registradas ({ventasDiarias.length})</h4>
+                    <h4 style={{ margin: 0, color: 'var(--text-muted)' }}>Movimientos Registrados ({historialMovimientos.length})</h4>
                     <button className="btn btn-outline" style={{ padding: '8px 16px', borderColor: 'var(--libre)', color: 'var(--libre)' }} onClick={exportarAExcel}>
                       <Download size={18} style={{ marginRight: '8px' }} /> Exportar a Excel
                     </button>
                   </div>
                   <div className="admin-table-container">
                     <table className="admin-table">
-                      <thead><tr><th>Hora</th><th>Detalle del Pedido</th><th>Método</th><th>Total</th><th style={{ textAlign: 'center' }}>Acciones</th></tr></thead>
+                      <thead><tr><th>Hora</th><th>Detalle del Movimiento</th><th>Método</th><th>Monto</th><th style={{ textAlign: 'center' }}>Acciones</th></tr></thead>
                       <tbody>
-                        {ventasDiarias.length === 0 ? (
-                          <tr><td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>Todavía no hay ventas registradas en la nube.</td></tr>
+                        {historialMovimientos.length === 0 ? (
+                          <tr><td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>Todavía no hay movimientos registrados en la nube.</td></tr>
                         ) : (
-                          ventasDiarias.map(venta => (
-                            <tr key={venta.id}>
-                              <td style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{venta.hora}</td>
-                              <td style={{ fontSize: '13px' }}>{venta.resumen}</td>
-                              <td><span style={{ background: 'var(--bg)', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, color: 'var(--text)' }}>{venta.metodo}</span></td>
-                              <td style={{ color: 'var(--accent)', fontWeight: 700 }}>{formatMoney(venta.total)}</td>
-                              <td style={{ textAlign: 'center' }}>
-                                <button className="icon-btn-ghost" style={{ color: 'var(--ocupada)', margin: '0 auto' }} onClick={() => setVentaAEliminar(venta.id)}>
-                                  <Trash2 size={18} />
-                                </button>
-                              </td>
-                            </tr>
-                          ))
+                          historialMovimientos.map(mov => {
+                            const esGasto = mov.tipo === 'gasto';
+                            return (
+                              <tr key={`${mov.tipo}-${mov.id}`}>
+                                <td style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{esGasto ? '--:--' : mov.hora}</td>
+                                <td style={{ fontSize: '13px' }}>
+                                  {esGasto ? <span style={{ color: 'var(--ocupada)', fontWeight: 600 }}>GASTO: {mov.descripcion}</span> : mov.resumen}
+                                </td>
+                                <td>
+                                  <span style={{ background: 'var(--bg)', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, color: 'var(--text)' }}>
+                                    {esGasto ? 'Efectivo' : mov.metodo}
+                                  </span>
+                                </td>
+                                <td style={{ color: esGasto ? 'var(--ocupada)' : 'var(--accent)', fontWeight: 700 }}>
+                                  {esGasto ? `-${formatMoney(mov.monto)}` : formatMoney(mov.total)}
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  <button className="icon-btn-ghost" style={{ color: 'var(--ocupada)', margin: '0 auto' }} onClick={() => setVentaAEliminar(mov)}>
+                                    <Trash2 size={18} />
+                                  </button>
+                                </td>
+                              </tr>
+                            )
+                          })
                         )}
                       </tbody>
                     </table>
@@ -664,12 +681,17 @@ export default function PubApp({ onSalir }) {
         </div>
       )}
 
+      {/* 🚀 MODAL ACTUALIZADO PARA VENTAS O GASTOS */}
       {ventaAEliminar !== null && (
         <div className="modal-overlay" style={{ zIndex: 3000 }}>
           <div className="modal-content" style={{ maxWidth: '350px', textAlign: 'center', padding: '24px' }}>
             <Trash2 size={48} color="var(--ocupada)" style={{ margin: '0 auto 16px' }} />
-            <h3 style={{ marginTop: 0 }}>¿Eliminar Venta?</h3>
-            <p style={{ color: 'var(--text-muted)' }}>Se restará este monto del total de la caja. Esta acción no se puede deshacer.</p>
+            <h3 style={{ marginTop: 0 }}>¿Eliminar {ventaAEliminar.tipo === 'gasto' ? 'Gasto' : 'Venta'}?</h3>
+            <p style={{ color: 'var(--text-muted)' }}>
+              {ventaAEliminar.tipo === 'gasto' 
+                ? 'Se anulará este gasto y el monto volverá a sumarse a la caja.' 
+                : 'Se restará este monto del total de la caja.'} Esta acción no se puede deshacer.
+            </p>
             <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
               <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setVentaAEliminar(null)}>Cancelar</button>
               <button className="btn btn-primary" style={{ flex: 1, background: 'var(--ocupada)', border: 'none' }} onClick={confirmarEliminacionVenta}>
