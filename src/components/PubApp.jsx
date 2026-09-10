@@ -159,21 +159,17 @@ export default function PubApp({ onSalir }) {
 
     const ticketHTML = `
       <html>
-        <head>
+  <head>
           <title>Imprimir Ticket</title>
           <style>
-            /* 🚀 ESTO ARREGLA EL CORTE AUTOMÁTICO */
-            @page {
-              margin: 0;
-              size: auto; 
-            }
-            /* 🚀 padding-bottom: 50px deja los centímetros en blanco que pidió el cliente */
+            @page { margin: 0; size: auto; }
             body { 
               font-family: 'Courier New', Courier, monospace; 
               color: #000; 
-              margin: 0; 
-              padding: 10px 10px 50px 10px; 
-              width: 300px; 
+              margin: 0 auto; 
+              padding: 10px 15px 50px 15px; 
+              width: 270px; 
+              box-sizing: border-box;
             }
             h2 { text-align: center; margin: 0 0 10px 0; text-transform: uppercase; font-size: 22px; }
             p { text-align: center; margin: 0 0 10px 0; font-size: 12px; }

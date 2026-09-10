@@ -466,15 +466,16 @@ function TicketCocinaModal({ mesa, onClose }) {
 
     const ticketHTML = `
       <html>
-    <head>
+<head>
           <style>
             @page { margin: 0; size: auto; }
             body { 
               font-family: 'Courier New', Courier, monospace; 
               color: #000; 
-              margin: 0; 
-              padding: 10px 10px 50px 10px; 
-              width: 300px; 
+              margin: 0 auto; 
+              padding: 10px 15px 50px 15px; 
+              width: 270px; 
+              box-sizing: border-box;
             }
             .divider { border-top: 1px dashed #000; margin: 10px 0; }
           </style>
@@ -571,15 +572,17 @@ function ConfirmarCobroModal({ mesa, onCancelar, onConfirmar }) {
 
     const ticketHTML = `
       <html>
-   <head>
+<head>
           <style>
             @page { margin: 0; size: auto; }
             body { 
               font-family: 'Courier New', Courier, monospace; 
               color: #000; 
-              margin: 0; 
-              padding: 10px 10px 50px 10px; 
-              width: 300px; 
+              margin: 0 auto; 
+              /* 15px de margen a los costados para que no muerda el borde */
+              padding: 10px 15px 50px 15px; 
+              width: 270px; /* Ancho ideal para 58mm */
+              box-sizing: border-box; /* Obliga a que los márgenes se respeten hacia adentro */
             }
             .divider { border-top: 1px dashed #000; margin: 10px 0; }
             .row { display: flex; justify-content: space-between; margin-bottom: 4px; }
