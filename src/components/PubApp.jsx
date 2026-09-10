@@ -142,7 +142,7 @@ export default function PubApp({ onSalir }) {
     }
   }
 
-  function imprimirTicket() {
+ function imprimirTicket() {
     if (ticket.length === 0) {
       mostrarAlerta('Agregá un producto antes de imprimir.');
       return;
@@ -166,7 +166,19 @@ export default function PubApp({ onSalir }) {
         <head>
           <title>Imprimir Ticket</title>
           <style>
-            body { font-family: 'Courier New', Courier, monospace; color: #000; margin: 0; padding: 10px; width: 300px; }
+            /* 🚀 ESTO ARREGLA EL CORTE AUTOMÁTICO */
+            @page {
+              margin: 0;
+              size: auto; 
+            }
+            /* 🚀 padding-bottom: 50px deja los centímetros en blanco que pidió el cliente */
+            body { 
+              font-family: 'Courier New', Courier, monospace; 
+              color: #000; 
+              margin: 0; 
+              padding: 10px 10px 50px 10px; 
+              width: 300px; 
+            }
             h2 { text-align: center; margin: 0 0 10px 0; text-transform: uppercase; font-size: 22px; }
             p { text-align: center; margin: 0 0 10px 0; font-size: 12px; }
             table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 14px; }
@@ -185,7 +197,7 @@ export default function PubApp({ onSalir }) {
           </table>
           <hr />
           <h3>TOTAL: ${formatMoney(total)}</h3>
-          <p>¡Gracias por tu visita!</p>
+          <p style="margin-top: 15px;">¡Gracias por tu visita!</p>
         </body>
       </html>
     `;

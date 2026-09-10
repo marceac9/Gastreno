@@ -466,9 +466,16 @@ function TicketCocinaModal({ mesa, onClose }) {
 
     const ticketHTML = `
       <html>
-        <head>
+    <head>
           <style>
-            body { font-family: 'Courier New', Courier, monospace; color: #000; margin: 0; padding: 10px; width: 300px; }
+            @page { margin: 0; size: auto; }
+            body { 
+              font-family: 'Courier New', Courier, monospace; 
+              color: #000; 
+              margin: 0; 
+              padding: 10px 10px 50px 10px; 
+              width: 300px; 
+            }
             .divider { border-top: 1px dashed #000; margin: 10px 0; }
           </style>
         </head>
@@ -564,9 +571,16 @@ function ConfirmarCobroModal({ mesa, onCancelar, onConfirmar }) {
 
     const ticketHTML = `
       <html>
-        <head>
+   <head>
           <style>
-            body { font-family: 'Courier New', Courier, monospace; color: #000; margin: 0; padding: 10px; width: 300px; }
+            @page { margin: 0; size: auto; }
+            body { 
+              font-family: 'Courier New', Courier, monospace; 
+              color: #000; 
+              margin: 0; 
+              padding: 10px 10px 50px 10px; 
+              width: 300px; 
+            }
             .divider { border-top: 1px dashed #000; margin: 10px 0; }
             .row { display: flex; justify-content: space-between; margin-bottom: 4px; }
           </style>
